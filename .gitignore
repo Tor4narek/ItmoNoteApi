@@ -1,0 +1,7 @@
+bin/
+obj/
+/packages/
+riderModule.iml
+/_ReSharper.Caches/
+/INAPI/appsettings.json
+/INAPI/appsettings.Development.json

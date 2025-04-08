@@ -27,6 +27,14 @@ public class Note
     [Column("username")]
     public string Username { get; set; }
 
+    [Column("is_public")]
+    public bool IsPublic
+    {
+        get; set;
+        
+    }
+    
+
    
     
     

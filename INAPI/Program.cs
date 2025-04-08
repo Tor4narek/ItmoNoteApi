@@ -88,15 +88,14 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // Включаем Swagger только в режиме разработки
-if (app.Environment.IsDevelopment())
-{
+
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "Notes API v1");
         c.RoutePrefix = string.Empty; // Открывать Swagger по умолчанию
     });
-}
+
 
 app.UseCors("AllowAll");
 app.UseRouting();

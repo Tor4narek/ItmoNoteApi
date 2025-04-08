@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using Services;
 using Storage;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.JsonWebTokens;
 
 namespace ItmoNoteAPI.Controllers
 {
@@ -19,24 +21,45 @@ namespace ItmoNoteAPI.Controllers
             _noteService = noteService;
         }
 
-        // Получить все записи
+        // Получить все публичные записи
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Note>>> GetNotes()
+        public async Task<ActionResult<IEnumerable<Note>>> GetPublicNotes()
         {
-            var notes = await _noteService.GetNotesAsync();
+            var notes = await _noteService.GetPublicNotesAsync();
+            return Ok(notes);
+        }
+        // Получить все приватные записи пользователя
+        [Authorize]
+        [HttpGet("private")]
+        public async Task<ActionResult<IEnumerable<Note>>> GetPrivateNotes()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+            {
+                return Unauthorized("Не удалось получить идентификатор пользователя из токена.");
+            }
+
+            if (!int.TryParse(userIdClaim.Value, out int userId))
+            {
+                return BadRequest("Неверный формат идентификатора пользователя.");
+            }
+
+            var notes = await _noteService.GetUserNotesAsync(userId, false);
             return Ok(notes);
         }
 
+        
         // Добавить новую запись
         [Authorize]
         [HttpPost]
-        public async Task<ActionResult> CreateNote(string title, string description, string category, int userId, [FromBody] string text)
+        public async Task<ActionResult> CreateNote(string title, string description, string category, int userId, bool isPublic, [FromBody] string text)
         {
-            await _noteService.AddNoteAsync(title, description, text, category, userId);
-            return CreatedAtAction(nameof(GetNotes), new { }, null);
+            await _noteService.AddNoteAsync(title, description, text, category, userId, isPublic);
+            return Ok();
         }
 
         // Получить запись по Id
+   
         [HttpGet("{id}")]
         public async Task<ActionResult<Note>> GetNoteById(int id)
         {
@@ -89,12 +112,25 @@ namespace ItmoNoteAPI.Controllers
         }
 
         // Форматировать текст заметки
+        [Authorize]
         [HttpPost("format")]
         public async Task<ActionResult<string>> FormatNote([FromBody] FormatNoteRequest request)
         {
             var formattedText = await _noteService.FormatNoteAsync(request.Text, request.Prompt);
             return Ok(formattedText);
         }
+        [HttpGet("categories")]
+         public async Task<ActionResult<IEnumerable<Category>>> GetCategories()
+               {
+                   var categories = await _noteService.GetCategoriesAsync();
+                   return Ok(categories);
+               }
+        [HttpPost("category")]
+         public async Task<ActionResult> CreateCategory(string name)
+               {
+                    await _noteService.CreateCategoryAsync(name);
+                    return CreatedAtAction(nameof(GetCategories), new { }, null);
+               }
     }
 
     public class FormatNoteRequest

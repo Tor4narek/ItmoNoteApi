@@ -29,6 +29,23 @@ namespace Services;
             var _user = await GetUserById(id);
             if (_user != null)
             {
+                if (username != _user.Username)
+                {
+                    _user.Username = username;
+                    _context.Users.Update(_user);
+                }
+
+                if (firstName != _user.FirstName)
+                {
+                    _user.FirstName = firstName;
+                    _context.Users.Update(_user);
+                }
+
+                if (lastName != _user.LastName)
+                {
+                    _user.LastName = lastName;
+                    _context.Users.Update(_user);
+                }
                 return _user; // Пользователь существует, возвращаем его
             }
             else

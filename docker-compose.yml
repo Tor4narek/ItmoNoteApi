@@ -1,0 +1,15 @@
+﻿services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:5000"
+      - "8081:5001"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+    restart: unless-stopped
+    volumes:
+      - datakeys:/home/app/.aspnet/DataProtection-Keys
+volumes:
+  datakeys:

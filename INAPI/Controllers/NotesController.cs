@@ -112,7 +112,7 @@ namespace ItmoNoteAPI.Controllers
         }
 
         // Форматировать текст заметки
-        [Authorize]
+        // [Authorize]
         [HttpPost("format")]
         public async Task<ActionResult<string>> FormatNote([FromBody] FormatNoteRequest request)
         {

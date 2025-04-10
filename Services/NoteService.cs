@@ -55,7 +55,7 @@ namespace Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task<String> FormatNoteAsync(string text, string prompt)
+        public async Task<string> FormatNoteAsync(string text, string prompt)
         {
             var newText = await _aiService.GenerateTextWithAIAsync(text, prompt);
             return newText;

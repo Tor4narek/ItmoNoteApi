@@ -1,6 +1,6 @@
 ﻿services:
   api:
-    image: tor4narek/inapi:latest
+    build: Dockerfile
     ports:
       - "8080:5000"
       - "8081:5001"

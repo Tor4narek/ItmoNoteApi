@@ -41,7 +41,7 @@ jobs:
           docker tag inapi-api:latest tor4narek/inapi:latest
           docker push tor4narek/inapi:latest
       
-      # Деплой на Ubuntu   сервер
+      # Деплой на Ubuntu    сервер
       - name: Deploy to Ubuntu Server
         uses: appleboy/ssh-action@master
         with:

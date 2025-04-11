@@ -1,8 +1,6 @@
 ﻿services:
   api:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: tor4narek/inapi:latest
     ports:
       - "8080:5000"
       - "8081:5001"

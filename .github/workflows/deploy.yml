@@ -32,6 +32,8 @@ jobs:
       
       # Сборка и пуш Docker образа
       - name: Build and push Docker image
+        env:
+          COMPOSE_PROJECT_NAME: inapi
         run: |
           docker compose build --no-cache
           echo "Listing Docker images after build:"

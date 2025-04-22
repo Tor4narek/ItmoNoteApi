@@ -11,5 +11,6 @@
     restart: unless-stopped
     volumes:
       - datakeys:/home/app/.aspnet/DataProtection-Keys
+      - /var/appdata/markdown:/app/data/markdown
 volumes:
   datakeys:

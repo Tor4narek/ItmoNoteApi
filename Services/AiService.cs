@@ -9,11 +9,13 @@ public class AiService : IAiService
 {
     private readonly string _authorizationToken;
     private readonly string _apiUrl;
+    private readonly string _filesUrl;
 
     public AiService(IConfiguration configuration)
     {
         _authorizationToken = configuration["АuthorizationToken:Key"];
         _apiUrl = configuration["AiApi:Url"];
+        _filesUrl = configuration["markdown:markdownProd"];
     }
 
     // Генерация текста через нейросеть
@@ -60,22 +62,24 @@ public class AiService : IAiService
     // Создание Markdown-файла из текста
     public async Task<string> CreateMarkdownFileAsync(string text, string title)
     {
-        string safeTitle = Regex.Replace(title, "[^a-zA-Zа-яА-Я0-9]", "_");
-        string directoryPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "files");
+        var safeTitle = Regex.Replace(title, "[^a-zA-Zа-яА-Я0-9]", "_");
+        var directoryPath = _filesUrl;
 
         if (!Directory.Exists(directoryPath))
         {
             Directory.CreateDirectory(directoryPath);
         }
 
-        string filePath = Path.Combine(directoryPath, safeTitle + ".md");
+        var filePath = Path.Combine(directoryPath, safeTitle + ".md");
         await File.WriteAllTextAsync(filePath, text, Encoding.UTF8);
+
+        // Путь для клиента (если нужно возвращать для ссылок)
         return $"/files/{safeTitle}.md";
     }
 }
 
 
-// Модель ответа от API (предполагается, что она у вас уже есть)
+
 public class ResponseModel
 {
     public Choice[] Choices { get; set; }

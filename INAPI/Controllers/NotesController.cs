@@ -50,7 +50,7 @@ namespace ItmoNoteAPI.Controllers
 
         
         // Добавить новую запись
-        [Authorize]
+        // [Authorize]
         [HttpPost]
         public async Task<ActionResult> CreateNote(string title, string description, string category, int userId, bool isPublic, [FromBody] string text)
         {

@@ -60,24 +60,26 @@ jobs:
             # Пулл нового Docker образа
             docker pull tor4narek/inapi:latest
 
-            # Передача конфигурационных данных в переменные окружения на сервере
-            echo "Exporting environment variables..."
-            echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> ~/.bashrc
-            echo "JWT_ISSUER=${{ secrets.JWT_ISSUER }}" >> ~/.bashrc
-            echo "JWT_AUDIENCE=${{ secrets.JWT_AUDIENCE }}" >> ~/.bashrc
-            echo "JWT_EXPIRY_IN_MINUTES=${{ secrets.JWT_EXPIRY_IN_MINUTES }}" >> ~/.bashrc
-            echo "TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}" >> ~/.bashrc
-            echo "MARKDOWN_PROD_PATH=${{ secrets.MARKDOWN_PROD_PATH }}" >> ~/.bashrc
-            echo "LOGGING__LOGLEVEL__DEFAULT=${{ secrets.LOGGING__LOGLEVEL__DEFAULT }}" >> ~/.bashrc
-            echo "LOGGING__LOGLEVEL__MICROSOFT_ASPNETCORE=${{ secrets.LOGGING__LOGLEVEL__MICROSOFT_ASPNETCORE }}" >> ~/.bashrc
-            echo "DEFAULT_CONNECTION=${{ secrets.DEFAULT_CONNECTION }}" >> ~/.bashrc
-            echo "ALLOWEDHOSTS=${{ secrets.ALLOWEDHOSTS }}" >> ~/.bashrc
+            # Создание .env файла с переменными окружения
+            echo "Creating .env file..."
+            echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" > .env
+            echo "JWT_ISSUER=${{ secrets.JWT_ISSUER }}" >> .env
+            echo "JWT_AUDIENCE=${{ secrets.JWT_AUDIENCE }}" >> .env
+            echo "JWT_EXPIRY_IN_MINUTES=${{ secrets.JWT_EXPIRY_IN_MINUTES }}" >> .env
+            echo "TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}" >> .env
+            echo "MARKDOWN_PROD_PATH=${{ secrets.MARKDOWN_PROD_PATH }}" >> .env
+            echo "LOGGING__LOGLEVEL__DEFAULT=${{ secrets.LOGGING__LOGLEVEL__DEFAULT }}" >> .env
+            echo "LOGGING__LOGLEVEL__MICROSOFT_ASPNETCORE=${{ secrets.LOGGING__LOGLEVEL__MICROSOFT_ASPNETCORE }}" >> .env
+            echo "DEFAULT_CONNECTION=${{ secrets.DEFAULT_CONNECTION }}" >> .env
+            echo "ALLOWEDHOSTS=${{ secrets.ALLOWEDHOSTS }}" >> .env
 
-            # Обновление переменных окружения
-            source ~/.bashrc
+            # Настройка директории для DataProtection-Keys
+            mkdir -p ~/inapi/data-protection-keys
+            chmod -R 700 ~/inapi/data-protection-keys
+            
 
-            # Сохраняем docker-compose файл с секректами
+            # Сохраняем docker-compose файл
             echo "${{ secrets.DOCKER_COMPOSE }}" > docker-compose.yml
 
             # Запуск контейнера
-            docker compose up -d
+            docker compose --env-file .env up -d

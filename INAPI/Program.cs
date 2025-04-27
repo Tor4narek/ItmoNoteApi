@@ -7,26 +7,28 @@ using Storage;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using DotNetEnv;
 
+
+Env.Load();
 var builder = WebApplication.CreateBuilder(args);
-// Подключаем DbContext с конфигурацией строки подключения из appsettings.json
+
+// Подключаем DbContext с конфигурацией строки подключения из переменной окружения
 builder.Services.AddDbContext<ApplicationContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(Environment.GetEnvironmentVariable("DEFAULT_CONNECTION")));
+
 // Регистрируем сервисы
-builder.Services.AddScoped<IAiService>(provider => new AiService(  provider.GetRequiredService<IConfiguration>()));
-builder.Services.AddScoped<IUserService>(provider => 
-    new UserService(
-        provider.GetRequiredService<ApplicationContext>(),
-        provider.GetRequiredService<IConfiguration>()
-    ));
+builder.Services.AddScoped<IAiService, AiService>();
+
+builder.Services.AddScoped<IUserService>(provider =>
+    new UserService(provider.GetRequiredService<ApplicationContext>()));
+
 builder.Services.AddScoped<INoteService>(provider => 
     new NoteService(
         provider.GetRequiredService<ApplicationContext>(),
         provider.GetRequiredService<IAiService>(),
         provider.GetRequiredService<IUserService>()
     ));
-
-
 
 // Настройка JWT
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -38,11 +40,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+            ValidIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER"),
+            ValidAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE"),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWT_KEY")))
         };
     });
+
 // Добавляем контроллеры
 builder.Services.AddControllers();
 
@@ -74,6 +77,8 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
+
+// Настройки CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",
@@ -88,14 +93,12 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // Включаем Swagger только в режиме разработки
-
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Notes API v1");
-        c.RoutePrefix = string.Empty; // Открывать Swagger по умолчанию
-    });
-
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Notes API v1");
+    c.RoutePrefix = string.Empty; // Открывать Swagger по умолчанию
+});
 
 app.UseCors("AllowAll");
 app.UseRouting();

@@ -5,3 +5,4 @@ riderModule.iml
 /_ReSharper.Caches/
 /INAPI/appsettings.json
 /INAPI/appsettings.Development.json
+/INAPI/.env

@@ -11,12 +11,13 @@ public class AiService : IAiService
     private readonly string _apiUrl;
     private readonly string _filesUrl;
 
-    public AiService(IConfiguration configuration)
-    {
-        _authorizationToken = configuration["АuthorizationToken:Key"];
-        _apiUrl = configuration["AiApi:Url"];
-        _filesUrl = configuration["markdown:markdownProd"];
-    }
+   public AiService()
+   {
+       _authorizationToken = Environment.GetEnvironmentVariable("AUTHORIZATION_TOKEN_KEY");
+       _apiUrl = Environment.GetEnvironmentVariable("AI_API_URL");
+       _filesUrl = Environment.GetEnvironmentVariable("MARKDOWN_PROD_PATH");
+   }
+
 
     // Генерация текста через нейросеть
     public async Task<string> GenerateTextWithAIAsync(string text, string prompt)

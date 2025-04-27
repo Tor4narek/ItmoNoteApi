@@ -14,11 +14,12 @@ namespace Services;
         private readonly ApplicationContext _context;
         private readonly string BotToken; // Замените на ваш токен бота
 
-        public UserService(ApplicationContext context, IConfiguration requiredService)
+        public UserService(ApplicationContext context)
         {
             _context = context;
-            BotToken = requiredService["Telegram:BotToken"];
+            BotToken = Environment.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN");
         }
+
 
         public async Task<User> AuthenticationAsync(int id, string firstName, string lastName, string username, string hash, long authDate)
         {

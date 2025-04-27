@@ -62,9 +62,7 @@ jobs:
 
             # Передача конфигурационных данных в переменные окружения на сервере
             echo "Exporting environment variables..."
-            echo "AI_API_URL=${{ secrets.AI_API_URL }}" >> ~/.bashrc
-            echo "AUTHORIZATION_TOKEN_KEY=${{ secrets.AUTHORIZATION_TOKEN_KEY }}" >> ~/.bashrc
-            echo "JWT_KEY=${{ secrets.JWT_KEY }}" >> ~/.bashrc
+            echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> ~/.bashrc
             echo "JWT_ISSUER=${{ secrets.JWT_ISSUER }}" >> ~/.bashrc
             echo "JWT_AUDIENCE=${{ secrets.JWT_AUDIENCE }}" >> ~/.bashrc
             echo "JWT_EXPIRY_IN_MINUTES=${{ secrets.JWT_EXPIRY_IN_MINUTES }}" >> ~/.bashrc

@@ -76,10 +76,7 @@ jobs:
             # Настройка директории для DataProtection-Keys
             mkdir -p ~/inapi/data-protection-keys
             chmod -R 700 ~/inapi/data-protection-keys
-            
-
-            # Сохраняем docker-compose файл
-            echo "${{ secrets.DOCKER_COMPOSE }}" > docker-compose.yml
+            chown -R root:root ~/inapi/data-protection-keys
 
             # Запуск контейнера
-            docker compose --env-file .env up -d
+            docker compose up -d

@@ -1,17 +1,15 @@
 ﻿# Базовый образ для runtime
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
-# Проверка существования пользователя app или создание нового
-RUN if ! id -u app > /dev/null 2>&1; then useradd -m app; fi
+# Создание директории для DataProtection-Keys
 RUN mkdir -p /root/.aspnet/DataProtection-Keys \
-    && chown -R app:app /root/.aspnet/DataProtection-Keys \
     && chmod -R 700 /root/.aspnet/DataProtection-Keys
 
 # Сборка проекта
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["INAPI/INAPI.csproj", "INAPI/"]
@@ -30,5 +28,4 @@ RUN dotnet publish "INAPI.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:Use
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish . 
-USER app
 ENTRYPOINT ["dotnet", "INAPI.dll"]

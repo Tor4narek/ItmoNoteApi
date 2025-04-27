@@ -50,24 +50,36 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd ~/inapi
+
+            # Логин в Docker на сервере
             echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+            # Остановка старого контейнера
             docker compose down || true
+
+            # Пулл нового Docker образа
             docker pull tor4narek/inapi:latest
 
             # Передача конфигурационных данных в переменные окружения на сервере
-            export AI_API_URL="${{ secrets.AI_API_URL }}"
-            export AUTHORIZATION_TOKEN_KEY="${{ secrets.AUTHORIZATION_TOKEN_KEY }}"
-            export JWT_KEY="${{ secrets.JWT_KEY }}"
-            export JWT_ISSUER="${{ secrets.JWT_ISSUER }}"
-            export JWT_AUDIENCE="${{ secrets.JWT_AUDIENCE }}"
-            export JWT_EXPIRY_IN_MINUTES="${{ secrets.JWT_EXPIRY_IN_MINUTES }}"
-            export TELEGRAM_BOT_TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
-            export MARKDOWN_PROD_PATH="${{ secrets.MARKDOWN_PROD_PATH }}"
-            export LOGGING__LOGLEVEL__DEFAULT="${{ secrets.LOGGING__LOGLEVEL__DEFAULT }}"
-            export LOGGING__LOGLEVEL__MICROSOFT_ASPNETCORE="${{ secrets.LOGGING__LOGLEVEL__MICROSOFT_ASPNETCORE }}"
-            export DEFAULT_CONNECTION="${{ secrets.DEFAULT_CONNECTION }}"
-            export ALLOWEDHOSTS="${{ secrets.ALLOWEDHOSTS }}"
-            
+            echo "Exporting environment variables..."
+            echo "AI_API_URL=${{ secrets.AI_API_URL }}" >> ~/.bashrc
+            echo "AUTHORIZATION_TOKEN_KEY=${{ secrets.AUTHORIZATION_TOKEN_KEY }}" >> ~/.bashrc
+            echo "JWT_KEY=${{ secrets.JWT_KEY }}" >> ~/.bashrc
+            echo "JWT_ISSUER=${{ secrets.JWT_ISSUER }}" >> ~/.bashrc
+            echo "JWT_AUDIENCE=${{ secrets.JWT_AUDIENCE }}" >> ~/.bashrc
+            echo "JWT_EXPIRY_IN_MINUTES=${{ secrets.JWT_EXPIRY_IN_MINUTES }}" >> ~/.bashrc
+            echo "TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}" >> ~/.bashrc
+            echo "MARKDOWN_PROD_PATH=${{ secrets.MARKDOWN_PROD_PATH }}" >> ~/.bashrc
+            echo "LOGGING__LOGLEVEL__DEFAULT=${{ secrets.LOGGING__LOGLEVEL__DEFAULT }}" >> ~/.bashrc
+            echo "LOGGING__LOGLEVEL__MICROSOFT_ASPNETCORE=${{ secrets.LOGGING__LOGLEVEL__MICROSOFT_ASPNETCORE }}" >> ~/.bashrc
+            echo "DEFAULT_CONNECTION=${{ secrets.DEFAULT_CONNECTION }}" >> ~/.bashrc
+            echo "ALLOWEDHOSTS=${{ secrets.ALLOWEDHOSTS }}" >> ~/.bashrc
+
+            # Обновление переменных окружения
+            source ~/.bashrc
+
             # Сохраняем docker-compose файл с секректами
             echo "${{ secrets.DOCKER_COMPOSE }}" > docker-compose.yml
+
+            # Запуск контейнера
             docker compose up -d

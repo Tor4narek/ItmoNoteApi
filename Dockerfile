@@ -4,8 +4,8 @@ WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
-# Создание пользователя app
-RUN useradd -m app
+# Проверка существования пользователя app или создание нового
+RUN if ! id -u app > /dev/null 2>&1; then useradd -m app; fi
 RUN mkdir -p /root/.aspnet/DataProtection-Keys \
     && chown -R app:app /root/.aspnet/DataProtection-Keys \
     && chmod -R 700 /root/.aspnet/DataProtection-Keys

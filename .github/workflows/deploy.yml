@@ -41,7 +41,7 @@ jobs:
           docker tag inapi-api:latest tor4narek/inapi:latest
           docker push tor4narek/inapi:latest
       
-      # Деплой на Ubuntu    сервер
+      # Деплой на Ubuntu сервер
       - name: Deploy to Ubuntu Server
         uses: appleboy/ssh-action@master
         with:
@@ -53,5 +53,21 @@ jobs:
             echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
             docker compose down || true
             docker pull tor4narek/inapi:latest
+
+            # Передача конфигурационных данных в переменные окружения на сервере
+            export AI_API_URL="${{ secrets.AI_API_URL }}"
+            export AUTHORIZATION_TOKEN_KEY="${{ secrets.AUTHORIZATION_TOKEN_KEY }}"
+            export JWT_KEY="${{ secrets.JWT_KEY }}"
+            export JWT_ISSUER="${{ secrets.JWT_ISSUER }}"
+            export JWT_AUDIENCE="${{ secrets.JWT_AUDIENCE }}"
+            export JWT_EXPIRY_IN_MINUTES="${{ secrets.JWT_EXPIRY_IN_MINUTES }}"
+            export TELEGRAM_BOT_TOKEN="${{ secrets.TELEGRAM_BOT_TOKEN }}"
+            export MARKDOWN_PROD_PATH="${{ secrets.MARKDOWN_PROD_PATH }}"
+            export LOGGING__LOGLEVEL__DEFAULT="${{ secrets.LOGGING__LOGLEVEL__DEFAULT }}"
+            export LOGGING__LOGLEVEL__MICROSOFT_ASPNETCORE="${{ secrets.LOGGING__LOGLEVEL__MICROSOFT_ASPNETCORE }}"
+            export DEFAULT_CONNECTION="${{ secrets.DEFAULT_CONNECTION }}"
+            export ALLOWEDHOSTS="${{ secrets.ALLOWEDHOSTS }}"
+            
+            # Сохраняем docker-compose файл с секректами
             echo "${{ secrets.DOCKER_COMPOSE }}" > docker-compose.yml
             docker compose up -d

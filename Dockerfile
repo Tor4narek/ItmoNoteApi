@@ -1,5 +1,5 @@
 ﻿# Базовый образ для runtime
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
@@ -9,7 +9,7 @@ RUN mkdir -p /root/.aspnet/DataProtection-Keys \
     && chmod -R 700 /root/.aspnet/DataProtection-Keys
 
 # Сборка проекта
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["INAPI/INAPI.csproj", "INAPI/"]

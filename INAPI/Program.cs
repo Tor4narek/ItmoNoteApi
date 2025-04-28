@@ -10,9 +10,16 @@ using System.Text;
 using DotNetEnv;
 
 
-DotNetEnv.Env.Load();
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+{
+    Args = args,
+    EnvironmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"
+});
 
-var builder = WebApplication.CreateBuilder(args);
+// ВАЖНО: Явно добавляем переменные окружения
+builder.Configuration.AddEnvironmentVariables();
+
+
 
 // Подключаем DbContext с конфигурацией строки подключения из переменной окружения
 builder.Services.AddDbContext<ApplicationContext>(options =>

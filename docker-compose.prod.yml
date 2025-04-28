@@ -2,13 +2,11 @@
 
 services:
   api:
-    container_name: inapi-api
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: tor4narek/inapi:latest
+    profiles: ["production"]
     ports:
-      - "8080:5000"   # HTTP
-      - "8081:5001"   # HTTPS и ли в торой сервисный порт
+      - "8080:5000"
+      - "8081:5001"
     env_file:
       - .env
     environment:
@@ -26,16 +24,6 @@ services:
     volumes:
       - data-protection-keys:/root/.aspnet/DataProtection-Keys
     restart: always
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "5"
 
 volumes:
   data-protection-keys:

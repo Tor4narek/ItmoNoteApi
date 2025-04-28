@@ -43,7 +43,7 @@ jobs:
         env:
           COMPOSE_PROJECT_NAME: inapi
         run: |
-          docker compose build --no-cache
+          docker compose -f docker-compose.yml -f docker-compose.prod.yml build --no-cache
           docker tag inapi-api:latest tor4narek/inapi:latest
           docker push tor4narek/inapi:latest
 
@@ -86,6 +86,6 @@ jobs:
             docker pull tor4narek/inapi:latest
 
             echo "Starting containers..."
-            docker compose up -d
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml --profile production up -d
 
             echo "Deployment complete ✅"

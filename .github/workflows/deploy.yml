@@ -26,7 +26,7 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       
-      # --- СТРОИМ .env перед сборкой ---
+      # --- СТРОИМ .env  перед сборкой ---
       - name: Create .env file for build
         run: |
           cat > .env <<EOF

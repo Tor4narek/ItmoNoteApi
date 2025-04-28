@@ -10,7 +10,8 @@ using System.Text;
 using DotNetEnv;
 
 
-Env.Load();
+DotNetEnv.Env.Load();
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Подключаем DbContext с конфигурацией строки подключения из переменной окружения

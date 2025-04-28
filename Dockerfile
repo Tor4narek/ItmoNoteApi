@@ -4,7 +4,7 @@ WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
-# Создание директории для Data Protection-Keys
+# Создание директории для D ata Protection-Keys
 RUN mkdir -p /root/.aspnet/DataProtection-Keys \
     && chmod -R 700 /root/.aspnet/DataProtection-Keys
 

@@ -42,7 +42,7 @@ jobs:
           ALLOWEDHOSTS=${{ secrets.ALLOWEDHOSTS }}
           EOF
       
-      # --- Теперь собираем и пушим ---
+      # --- Теперь собирае м и пушим ---
       - name: Build and push Docker image
         env:
           COMPOSE_PROJECT_NAME: inapi

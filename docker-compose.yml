@@ -8,7 +8,7 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8080:5000"   # HTTP
-      - "8081:5001"   # HTTPS и ли второй сервисный порт
+      - "8081:5001"   # HTTPS и ли в торой сервисный порт
     environment:
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - JWT_ISSUER=${JWT_ISSUER}

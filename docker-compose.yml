@@ -3,9 +3,7 @@
 services:
   api:
     container_name: inapi-api
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: tor4narek/inapi:latest
     ports:
       - "8080:5000"   # HTTP
       - "8081:5001"   # HTTPS и ли в торой сервисный порт

@@ -65,6 +65,9 @@ jobs:
             echo "Stopping existing containers..."
             docker compose down || true
 
+            echo "Waiting for a moment before restarting containers..."
+            sleep 5  # Задержка перед перезапуском контейнеров
+
             echo "Updating environment variables..."
             cat > .env <<EOF
             JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}

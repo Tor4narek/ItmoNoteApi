@@ -26,22 +26,7 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       
-      # --- Локально создаём .env для сборки ---
-      - name: Create .env file for build
-        run: |
-          cat > .env <<EOF
-          JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
-          JWT_ISSUER=${{ secrets.JWT_ISSUER }}
-          JWT_AUDIENCE=${{ secrets.JWT_AUDIENCE }}
-          JWT_EXPIRY_IN_MINUTES=${{ secrets.JWT_EXPIRY_IN_MINUTES }}
-          TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
-          MARKDOWN_PROD_PATH=${{ secrets.MARKDOWN_PROD_PATH }}
-          LOGGING__LOGLEVEL__DEFAULT=${{ secrets.LOGGING__LOGLEVEL__DEFAULT }}
-          LOGGING__LOGLEVEL__MICROSOFT_ASPNETCORE=${{ secrets.LOGGING__LOGLEVEL__MICROSOFT_ASPNETCORE }}
-          DEFAULT_CONNECTION=${{ secrets.DEFAULT_CONNECTION }}
-          ALLOWEDHOSTS=${{ secrets.ALLOWEDHOSTS }}
-          EOF
-
+      # Убираем создание .env файла - файл должен быть в репозитории или на сервере
       - name: Build and push Docker image
         env:
           COMPOSE_PROJECT_NAME: inapi
@@ -62,7 +47,7 @@ jobs:
           script: |
             cd ~/inapi
 
-            # Пересоздаём .env файл на сервере
+            # Пересоздаём .env файл на сервере (если он не был заранее на сервере, нужно будет его создать вручную)
             cat > .env <<EOF
             JWT_SECRET_KEY=$JWT_SECRET_KEY
             JWT_ISSUER=$JWT_ISSUER

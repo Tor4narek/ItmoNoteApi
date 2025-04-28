@@ -10,7 +10,7 @@ services:
       - "8080:5000"   # HTTP
       - "8081:5001"   # HTTPS и ли в торой сервисный порт
     environment:
-      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - JWT_KEY=${JWT_KEY}
       - JWT_ISSUER=${JWT_ISSUER}
       - JWT_AUDIENCE=${JWT_AUDIENCE}
       - JWT_EXPIRY_IN_MINUTES=${JWT_EXPIRY_IN_MINUTES}

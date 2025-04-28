@@ -2,20 +2,16 @@
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    
-    steps:
-      - uses: actions/checkout@v3
 
-      - name: Debug directory contents
-        run: |
-          pwd
-          ls -la
-          find . -type f
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -25,9 +21,9 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      
-      # --- СТРОИМ .env  перед сборкой ---
-      - name: Create .env file for build
+
+      # --- Строим .env для билда локально ---
+      - name: Create .env file for local Docker build
         run: |
           cat > .env <<EOF
           JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
@@ -41,17 +37,17 @@ jobs:
           DEFAULT_CONNECTION=${{ secrets.DEFAULT_CONNECTION }}
           ALLOWEDHOSTS=${{ secrets.ALLOWEDHOSTS }}
           EOF
-      
-      # --- Теперь собирае м и пушим ---
-      - name: Build and push Docker image
+
+      # --- Строим и пушим образ ---
+      - name: Build and Push Docker image
         env:
           COMPOSE_PROJECT_NAME: inapi
         run: |
           docker compose build --no-cache
-          docker images
           docker tag inapi-api:latest tor4narek/inapi:latest
           docker push tor4narek/inapi:latest
 
+      # --- Деплой на сервер ---
       - name: Deploy to Ubuntu Server
         uses: appleboy/ssh-action@master
         with:
@@ -59,16 +55,34 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            set -e
+
             cd ~/inapi
 
-            # Login to Docker
+            echo "Logging into Docker Hub..."
             echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-            # Stop old containers
+            echo "Stopping existing containers..."
             docker compose down || true
 
-            # Pull new image
+            echo "Updating environment variables..."
+            cat > .env <<EOF
+            JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
+            JWT_ISSUER=${{ secrets.JWT_ISSUER }}
+            JWT_AUDIENCE=${{ secrets.JWT_AUDIENCE }}
+            JWT_EXPIRY_IN_MINUTES=${{ secrets.JWT_EXPIRY_IN_MINUTES }}
+            TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
+            MARKDOWN_PROD_PATH=${{ secrets.MARKDOWN_PROD_PATH }}
+            LOGGING__LOGLEVEL__DEFAULT=${{ secrets.LOGGING__LOGLEVEL__DEFAULT }}
+            LOGGING__LOGLEVEL__MICROSOFT_ASPNETCORE=${{ secrets.LOGGING__LOGLEVEL__MICROSOFT_ASPNETCORE }}
+            DEFAULT_CONNECTION=${{ secrets.DEFAULT_CONNECTION }}
+            ALLOWEDHOSTS=${{ secrets.ALLOWEDHOSTS }}
+            EOF
+
+            echo "Pulling latest image..."
             docker pull tor4narek/inapi:latest
 
-            # Start containers
+            echo "Starting containers..."
             docker compose up -d
+
+            echo "Deployment complete ✅"

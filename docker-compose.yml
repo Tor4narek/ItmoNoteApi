@@ -8,7 +8,7 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8080:5000"   # HTTP
-      - "8081:5001"   # HTTPS или второй сервисный порт
+      - "8081:5001"   # HTTPS  или второй сервисный порт
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
     env_file:

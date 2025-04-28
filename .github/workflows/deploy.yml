@@ -9,39 +9,49 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      # Чекаут кода
       - uses: actions/checkout@v3
-      
-      # Отладка: вывести содержимое директории
+
       - name: Debug directory contents
         run: |
           pwd
           ls -la
           find . -type f
-      
-      # Настройка Docker Buildx
+
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v2
-      
-      # Логин в Docker Hub
+
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       
-      # Сборка и пуш Docker образа
+      # --- СТРОИМ .env перед сборкой ---
+      - name: Create .env file for build
+        run: |
+          cat > .env <<EOF
+          JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
+          JWT_ISSUER=${{ secrets.JWT_ISSUER }}
+          JWT_AUDIENCE=${{ secrets.JWT_AUDIENCE }}
+          JWT_EXPIRY_IN_MINUTES=${{ secrets.JWT_EXPIRY_IN_MINUTES }}
+          TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
+          MARKDOWN_PROD_PATH=${{ secrets.MARKDOWN_PROD_PATH }}
+          LOGGING__LOGLEVEL__DEFAULT=${{ secrets.LOGGING__LOGLEVEL__DEFAULT }}
+          LOGGING__LOGLEVEL__MICROSOFT_ASPNETCORE=${{ secrets.LOGGING__LOGLEVEL__MICROSOFT_ASPNETCORE }}
+          DEFAULT_CONNECTION=${{ secrets.DEFAULT_CONNECTION }}
+          ALLOWEDHOSTS=${{ secrets.ALLOWEDHOSTS }}
+          EOF
+      
+      # --- Теперь собираем и пушим ---
       - name: Build and push Docker image
         env:
           COMPOSE_PROJECT_NAME: inapi
         run: |
           docker compose build --no-cache
-          echo "Listing Docker images after build:"
           docker images
           docker tag inapi-api:latest tor4narek/inapi:latest
           docker push tor4narek/inapi:latest
-      
-      # Деплой на Ubuntu сервер
+
       - name: Deploy to Ubuntu Server
         uses: appleboy/ssh-action@master
         with:
@@ -51,32 +61,14 @@ jobs:
           script: |
             cd ~/inapi
 
-            # Логин в Docker на сервере
+            # Login to Docker
             echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-            # Остановка старого контейнера
+            # Stop old containers
             docker compose down || true
 
-            # Пулл нового Docker образа
+            # Pull new image
             docker pull tor4narek/inapi:latest
 
-            # Создание .env файла с переменными окружения
-            echo "Creating .env file..."
-            echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" > .env
-            echo "JWT_ISSUER=${{ secrets.JWT_ISSUER }}" >> .env
-            echo "JWT_AUDIENCE=${{ secrets.JWT_AUDIENCE }}" >> .env
-            echo "JWT_EXPIRY_IN_MINUTES=${{ secrets.JWT_EXPIRY_IN_MINUTES }}" >> .env
-            echo "TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}" >> .env
-            echo "MARKDOWN_PROD_PATH=${{ secrets.MARKDOWN_PROD_PATH }}" >> .env
-            echo "LOGGING__LOGLEVEL__DEFAULT=${{ secrets.LOGGING__LOGLEVEL__DEFAULT }}" >> .env
-            echo "LOGGING__LOGLEVEL__MICROSOFT_ASPNETCORE=${{ secrets.LOGGING__LOGLEVEL__MICROSOFT_ASPNETCORE }}" >> .env
-            echo "DEFAULT_CONNECTION=${{ secrets.DEFAULT_CONNECTION }}" >> .env
-            echo "ALLOWEDHOSTS=${{ secrets.ALLOWEDHOSTS }}" >> .env
-
-            # Настройка директории для DataProtection-Keys
-            mkdir -p ~/inapi/data-protection-keys
-            chmod -R 700 ~/inapi/data-protection-keys
-            chown -R root:root ~/inapi/data-protection-keys
-
-            # Запуск контейнера
+            # Start containers
             docker compose up -d

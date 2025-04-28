@@ -16,18 +16,21 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Services\Services.csproj" />
-      <ProjectReference Include="..\Storage\Storage.csproj" />
+        <ProjectReference Include="..\Services\Services.csproj" />
+        <ProjectReference Include="..\Storage\Storage.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="wwwroot\files\" />
+        <Content Include="..\.dockerignore">
+            <Link>.dockerignore</Link>
+        </Content>
     </ItemGroup>
 
+    <!-- Добавьте это для копирования .env файла в публикацию -->
     <ItemGroup>
-      <Content Include="..\.dockerignore">
-        <Link>.dockerignore</Link>
-      </Content>
+        <None Update=".env">
+            <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+        </None>
     </ItemGroup>
 
 </Project>

@@ -15,7 +15,7 @@ public class AiService : IAiService
    {
        _authorizationToken = Environment.GetEnvironmentVariable("AUTHORIZATION_TOKEN_KEY");
        _apiUrl = Environment.GetEnvironmentVariable("AI_API_URL");
-       _filesUrl = Environment.GetEnvironmentVariable("MARKDOWN_PROD_PATH");
+       _filesUrl = Environment.GetEnvironmentVariable("MARKDOWN_DEV_PATH");
    }
 
 

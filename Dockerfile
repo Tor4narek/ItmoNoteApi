@@ -27,5 +27,5 @@ RUN dotnet publish "INAPI.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:Use
 # Финальный образ
 FROM base AS final
 WORKDIR /app
-COPY --from=publish /app/publish . 
+COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "INAPI.dll"]

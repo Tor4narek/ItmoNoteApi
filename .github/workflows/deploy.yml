@@ -22,7 +22,7 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # --- Создание .env для сборки образа (если нужно локально) ---
+      # --- Создание .env для сб орки образа (если нужно локально) ---
       - name: Create .env file for local Docker build
         run: |
           cat > .env <<EOF

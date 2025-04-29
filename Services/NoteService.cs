@@ -127,7 +127,7 @@ namespace Services
 
         private async Task<Category> GetCategoryByName(string name)
         {
-            return await _context.Categories.FindAsync(name);
+            return await _context.Categories.FirstOrDefaultAsync(c => c.Name == name);
         }
 
         public async Task DeleteCategoryAsync(int id)

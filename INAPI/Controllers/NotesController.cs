@@ -41,7 +41,7 @@ namespace ItmoNoteAPI.Controllers
 
             if (!int.TryParse(userIdClaim.Value, out int userId))
             {
-                return BadRequest("Неверный формат идентификатора пользователя.");
+                return BadRequest("Неверный формат идентификатора пользователя");
             }
 
             var notes = await _noteService.GetUserNotesAsync(userId, false);

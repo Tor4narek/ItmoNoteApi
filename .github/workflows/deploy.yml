@@ -10,28 +10,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Забираем код
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2. Поднимаем Docker Buildx для multi‐arch и кешей
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      # 3. Достаём короткий SHA для версионирования образа
-      - name: Get short SHA
-        id: vars
-        run: echo "short_sha=${GITHUB_SHA::8}" >> $GITHUB_OUTPUT
-
-      # 4. Логинимся в Docker Hub
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # 5. Собираем локальный .env для сборки образа
-      - name: Create .env for build
+      # --- Создание .env для сборки образа (если нужно локально) ---
+      - name: Create .env file for local Docker build
         run: |
           cat > .env <<EOF
           JWT_KEY=${{ secrets.JWT_KEY }}
@@ -46,52 +38,35 @@ jobs:
           ALLOWEDHOSTS=${{ secrets.ALLOWEDHOSTS }}
           EOF
 
-      # 6. Собираем образ
-      - name: Build Docker image
-        run: docker compose build --no-cache
-
-      # 7. Тегируем образ двумя тегами: latest и SHA-версия
-      - name: Tag image
+      - name: Build and Push Docker image
+        env:
+          COMPOSE_PROJECT_NAME: inapi
         run: |
+          docker compose build --no-cache
           docker tag inapi-api:latest tor4narek/inapi:latest
-          docker tag inapi-api:latest tor4narek/inapi:${{ steps.vars.outputs.short_sha }}
-
-      # 8. Пушим оба тега в Docker Hub
-      - name: Push images
-        run: |
           docker push tor4narek/inapi:latest
-          docker push tor4narek/inapi:${{ steps.vars.outputs.short_sha }}
 
-      # 9. Заходим по SSH и деплоим на сервер
       - name: Deploy to Ubuntu Server
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          # Прокидываем тег в переменную IMAGE_TAG
-          env:
-            IMAGE_TAG: ${{ steps.vars.outputs.short_sha }}
           script: |
             set -e
+
             cd ~/inapi
 
-            # A) Обновляем локальную копию repo (docker-compose.yml и пр.)
-            echo "=== 🌱 Pull latest code (docker-compose.yml) ==="
-            git pull origin main
-
-            # B) Логинимся в Docker Hub
-            echo "=== 🔐 Docker login ==="
+            echo "=== 🔐 Docker Login ==="
             echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-            # C) Останавливаем старые контейнеры
-            echo "=== 🛑 Stop existing containers ==="
+            echo "=== 🛑 Stopping existing containers ==="
             docker compose down || true
 
-            sleep 5  # небольшая пауза
+            echo "=== ⏳ Wait before restart ==="
+            sleep 5
 
-            # D) Создаём .env на сервере
-            echo "=== 📝 Write .env file ==="
+            echo "=== 📝 Writing .env file ==="
             cat > .env <<EOF
             JWT_KEY=${{ secrets.JWT_KEY }}
             JWT_ISSUER=${{ secrets.JWT_ISSUER }}
@@ -105,20 +80,16 @@ jobs:
             ALLOWEDHOSTS=${{ secrets.ALLOWEDHOSTS }}
             EOF
 
-            echo "=== 📄 Show .env contents ==="
+            echo "=== 📄 .env contents ==="
             cat .env
 
-            # E) Подменяем тег образа в docker-compose.yml
-            echo "=== 🔄 Update image tag in docker-compose.yml ==="
-            sed -i "s|image: tor4narek/inapi:.*|image: tor4narek/inapi:${IMAGE_TAG}|" docker-compose.yml
+            echo "=== 🐳 Pulling latest Docker image ==="
+            docker pull tor4narek/inapi:latest
 
-            # F) Проверяем итоговый конфиг с подставленными .env и тегом
-            echo "=== 🔍 Docker Compose config ==="
+            echo "=== 🔍 Docker Compose config (resolved) ==="
             docker compose config
 
-            # G) Тянем нужный образ и поднимаем контейнеры
-            echo "=== 🐳 Pull new image and start containers ==="
-            docker compose pull
+            echo "=== 🚀 Starting containers ==="
             docker compose up -d
 
             echo "✅ Deployment complete"

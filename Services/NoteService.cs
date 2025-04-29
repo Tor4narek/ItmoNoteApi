@@ -25,7 +25,7 @@ namespace Services
                 .Where(n => n.IsPublic.Equals(true)) // Или используйте другие условия для фильтрации
                 .ToListAsync();
         }
-        // Получить публичные записи
+        // Получить записи
         public async Task<List<Note>> GetUserNotesAsync(int userId, bool isPublic)
         {
            var user =  await _userService.GetUserById(userId);
@@ -38,6 +38,11 @@ namespace Services
         // Добавить новую запись
         public async Task AddNoteAsync(string title,string description,string text,string category, int userId, bool isPublic)
         {
+            var cat = await GetCategoryByName(category);
+            if (cat==null)
+            {
+                await CreateCategoryAsync(category);
+            }
             var file = _aiService.CreateMarkdownFileAsync( text ,  title);
             var user = await _userService.GetUserById(userId);
             var note = new Note
@@ -118,6 +123,11 @@ namespace Services
         private async Task<Category> GetCategoryById(int id)
         {
             return await _context.Categories.FindAsync(id);
+        }
+
+        private async Task<Category> GetCategoryByName(string name)
+        {
+            return await _context.Categories.FindAsync(name);
         }
 
         public async Task DeleteCategoryAsync(int id)

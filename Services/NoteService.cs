@@ -89,10 +89,31 @@ namespace Services
             var note = await _context.Notes.FindAsync(id);
             if (note != null)
             {
+                // MARKDOWN_PROD_PATH — это абсолютный путь к папке /app/files
+                var basePath = Environment.GetEnvironmentVariable("MARKDOWN_PROD_PATH");
+
+                // note.File начинается с /files/, убираем это
+                var relativePath = note.File.Replace("/files/", "").TrimStart('/');
+                var fullPath = Path.Combine(basePath, relativePath);
+
+                // Удаляем файл, если он существует
+                if (!string.IsNullOrEmpty(fullPath) && File.Exists(fullPath))
+                {
+                    try
+                    {
+                        File.Delete(fullPath);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Ошибка при удалении файла: {ex.Message}");
+                    }
+                }
+
                 _context.Notes.Remove(note);
                 await _context.SaveChangesAsync();
             }
         }
+
         // Получить записи по заголовку (или тексту)
         public async Task<List<Note>> GetNotesByCategoryAsync(string category)
         {

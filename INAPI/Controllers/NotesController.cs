@@ -88,7 +88,7 @@ namespace ItmoNoteAPI.Controllers
         }
 
         // Удалить запись по Id
-        [Authorize]
+        // [Authorize]
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteNote(int id)
         {

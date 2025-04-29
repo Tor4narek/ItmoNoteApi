@@ -22,7 +22,7 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # --- Строим .env для билда локально ---
+      # --- Создание .env для сборки образа (если нужно локально) ---
       - name: Create .env file for local Docker build
         run: |
           cat > .env <<EOF
@@ -38,7 +38,6 @@ jobs:
           ALLOWEDHOSTS=${{ secrets.ALLOWEDHOSTS }}
           EOF
 
-      # --- Строим и пушим образ ---
       - name: Build and Push Docker image
         env:
           COMPOSE_PROJECT_NAME: inapi
@@ -47,7 +46,6 @@ jobs:
           docker tag inapi-api:latest tor4narek/inapi:latest
           docker push tor4narek/inapi:latest
 
-      # --- Деплой на сервер ---
       - name: Deploy to Ubuntu Server
         uses: appleboy/ssh-action@master
         with:
@@ -59,16 +57,16 @@ jobs:
 
             cd ~/inapi
 
-            echo "Logging into Docker Hub..."
+            echo "=== 🔐 Docker Login ==="
             echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-            echo "Stopping existing containers..."
+            echo "=== 🛑 Stopping existing containers ==="
             docker compose down || true
 
-            echo "Waiting for a moment before restarting containers..."
-            sleep 5  # Задержка перед перезапуском контейнеров
+            echo "=== ⏳ Wait before restart ==="
+            sleep 5
 
-            echo "Updating environment variables..."
+            echo "=== 📝 Writing .env file ==="
             cat > .env <<EOF
             JWT_KEY=${{ secrets.JWT_KEY }}
             JWT_ISSUER=${{ secrets.JWT_ISSUER }}
@@ -82,10 +80,16 @@ jobs:
             ALLOWEDHOSTS=${{ secrets.ALLOWEDHOSTS }}
             EOF
 
-            echo "Pulling latest image..."
+            echo "=== 📄 .env contents ==="
+            cat .env
+
+            echo "=== 🐳 Pulling latest Docker image ==="
             docker pull tor4narek/inapi:latest
 
-            echo "Starting containers..."
+            echo "=== 🔍 Docker Compose config (resolved) ==="
+            docker compose config
+
+            echo "=== 🚀 Starting containers ==="
             docker compose up -d
 
-            echo "Deployment complete ✅"
+            echo "✅ Deployment complete"

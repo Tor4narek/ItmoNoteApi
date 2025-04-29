@@ -8,20 +8,20 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8080:5000"   # HTTP
-      - "8081:5001"   # HTTPS и ли в торой сервисный порт
+      - "8081:5001"   # HTTPS или второй сервисный порт
     env_file:
       - .env
     environment:
-      - JWT_KEY=${JWT_KEY}
-      - JWT_ISSUER=${JWT_ISSUER}
-      - JWT_AUDIENCE=${JWT_AUDIENCE}
-      - JWT_EXPIRY_IN_MINUTES=${JWT_EXPIRY_IN_MINUTES}
-      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
-      - MARKDOWN_PROD_PATH=${MARKDOWN_PROD_PATH}
-      - LOGGING__LOGLEVEL__DEFAULT=${LOGGING__LOGLEVEL__DEFAULT}
-      - LOGGING__LOGLEVEL__MICROSOFT_ASPNETCORE=${LOGGING__LOGLEVEL__MICROSOFT_ASPNETCORE}
-      - DEFAULT_CONNECTION=${DEFAULT_CONNECTION}
-      - ALLOWEDHOSTS=${ALLOWEDHOSTS}
+      - JWT_KEY
+      - JWT_ISSUER
+      - JWT_AUDIENCE
+      - JWT_EXPIRY_IN_MINUTES
+      - TELEGRAM_BOT_TOKEN
+      - MARKDOWN_PROD_PATH
+      - LOGGING__LOGLEVEL__DEFAULT
+      - LOGGING__LOGLEVEL__MICROSOFT_ASPNETCORE
+      - DEFAULT_CONNECTION
+      - ALLOWEDHOSTS
       - ASPNETCORE_ENVIRONMENT=Production
     volumes:
       - data-protection-keys:/root/.aspnet/DataProtection-Keys

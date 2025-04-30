@@ -112,7 +112,7 @@ app.Urls.Add("http://0.0.0.0:5000");
 // Если хранишь файлы вне wwwroot — явно укажи путь к ним
 app.UseStaticFiles(new StaticFileOptions
 {
-    FileProvider = new PhysicalFileProvider("/root/inapi/files"),  // или свой путь к директории
+    FileProvider = new PhysicalFileProvider(Environment.GetEnvironmentVariable("MARKDOWN_PROD_PATH")),  // или свой путь к директории
     RequestPath = "/files"
 });
 

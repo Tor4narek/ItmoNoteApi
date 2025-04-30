@@ -89,7 +89,8 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
-
+// ВАЖНО: CORS до Routing
+app.UseCors("AllowAll");
 // Swagger
 app.UseSwagger();
 app.UseSwaggerUI(c =>
@@ -98,8 +99,7 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = string.Empty;
 });
 
-// ВАЖНО: CORS до Routing
-app.UseCors("AllowAll");
+
 
 app.UseRouting();
 app.UseAuthentication();

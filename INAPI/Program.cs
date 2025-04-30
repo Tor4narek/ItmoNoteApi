@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using DotNetEnv;
+using System.Text.RegularExpressions;
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {
@@ -15,23 +16,22 @@ var builder = WebApplication.CreateBuilder(new WebApplicationOptions
     EnvironmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"
 });
 
-// Загружаем переменные окружения
+// Загрузка .env (если нужно)
 builder.Configuration.AddEnvironmentVariables();
 
-// Настройка БД
+// Настройка базы данных
 builder.Services.AddDbContext<ApplicationContext>(options =>
     options.UseNpgsql(Environment.GetEnvironmentVariable("DEFAULT_CONNECTION")));
 
-// Регистрация сервисов
+// Сервисы
 builder.Services.AddScoped<IAiService, AiService>();
 builder.Services.AddScoped<IUserService>(provider =>
     new UserService(provider.GetRequiredService<ApplicationContext>()));
-builder.Services.AddScoped<INoteService>(provider => 
+builder.Services.AddScoped<INoteService>(provider =>
     new NoteService(
         provider.GetRequiredService<ApplicationContext>(),
         provider.GetRequiredService<IAiService>(),
-        provider.GetRequiredService<IUserService>()
-    ));
+        provider.GetRequiredService<IUserService>()));
 
 // JWT
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -49,25 +49,33 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-// Контроллеры
-builder.Services.AddControllers();
+// CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
 
-// Swagger
+// Контроллеры и Swagger
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Notes API", Version = "v1" });
-
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
-        Description = "Введите JWT токен (без 'Bearer ')",
+        Description = "Введите JWT токен",
         Name = "Authorization",
         Type = SecuritySchemeType.Http,
         Scheme = "bearer",
         BearerFormat = "JWT"
     });
-
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -75,26 +83,14 @@ builder.Services.AddSwaggerGen(c =>
             {
                 Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
             },
-            new string[] { }
+            Array.Empty<string>()
         }
-    });
-});
-
-// ✅ Настройка CORS для GitHub Pages
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowFrontend", policy =>
-    {
-        policy.WithOrigins("https://mohonovproduction.github.io")
-              .AllowAnyMethod()
-              .AllowAnyHeader()
-              .AllowCredentials(); // Если используешь cookies или Authorization
     });
 });
 
 var app = builder.Build();
 
-// Swagger только в dev
+// Swagger
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
@@ -102,16 +98,22 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = string.Empty;
 });
 
-// ✅ Применяем CORS до аутентификации
-app.UseCors("AllowFrontend");
+// ВАЖНО: CORS до Routing
+app.UseCors("AllowAll");
 
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 
+// Слушать на всех интерфейсах и порту 8080 (для Docker)
+app.Urls.Add("http://0.0.0.0:8080");
 
-app.Urls.Add("http://0.0.0.0:5000");
+// Если хранишь файлы вне wwwroot — явно укажи путь к ним
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider("/root/inapi/files"),  // или свой путь к директории
+    RequestPath = "/files"
+});
 
 app.Run();

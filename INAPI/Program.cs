@@ -107,7 +107,7 @@ app.UseAuthorization();
 app.MapControllers();
 
 // Слушать на всех интерфейсах и порту 8080 (для Docker)
-app.Urls.Add("http://0.0.0.0:8080");
+app.Urls.Add("http://0.0.0.0:5000");
 
 // Если хранишь файлы вне wwwroot — явно укажи путь к ним
 app.UseStaticFiles(new StaticFileOptions

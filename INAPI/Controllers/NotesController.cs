@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.JsonWebTokens;
+using Models.Entities;
 
 namespace ItmoNoteAPI.Controllers
 {

@@ -1,4 +1,5 @@
-﻿using Storage;
+﻿using Models.Entities;
+using Storage;
 
 namespace Services;
 

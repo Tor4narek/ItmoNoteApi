@@ -2,6 +2,7 @@
 using Storage;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Models.Entities;
 
 namespace Services
 {

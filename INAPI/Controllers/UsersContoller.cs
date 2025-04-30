@@ -6,6 +6,7 @@ using Services;
 using Storage;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Tokens;
+using Models.Entities;
 
 namespace ItmoNoteAPI.Controllers
 {

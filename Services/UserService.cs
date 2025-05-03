@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
 using Models.Entities;
+using Telegram.Bot.Extensions.LoginWidget;
+
 
 namespace Services;
 
@@ -13,7 +15,7 @@ namespace Services;
     {
         
         private readonly ApplicationContext _context;
-        private readonly string BotToken; // Замените на ваш токен бота
+        private readonly string BotToken; 
 
         public UserService(ApplicationContext context)
         {
@@ -24,8 +26,24 @@ namespace Services;
 
         public async Task<User> AuthenticationAsync(int id, string firstName, string lastName, string username, string hash, long authDate)
         {
-            // Проверяем подлинность данных Telegram
-           await CheckTelegramAuthorizationAsync(id, firstName, lastName, username, authDate, hash);
+            var fields = new Dictionary<string, string>
+            {
+                { "id", id.ToString() },
+                { "auth_date", authDate.ToString() },
+                { "hash", hash }
+            };
+
+            if (!string.IsNullOrEmpty(firstName)) fields["first_name"] = firstName;
+            if (!string.IsNullOrEmpty(lastName)) fields["last_name"] = lastName;
+            if (!string.IsNullOrEmpty(username)) fields["username"] = username;
+
+            var loginWidget = new LoginWidget(BotToken);
+            var result = loginWidget.CheckAuthorization(fields);
+
+            if (result != Authorization.Valid)
+            {
+                throw new Exception("Data is NOT from Telegram");
+            }
 
             // Ищем пользователя по ID
             var _user = await GetUserById(id);
@@ -48,11 +66,10 @@ namespace Services;
                     _user.LastName = lastName;
                     _context.Users.Update(_user);
                 }
-                return _user; // Пользователь существует, возвращаем его
+                return _user;
             }
             else
             {
-                // Создаём нового пользователя
                 var newUser = new User
                 {
                     Id = id,
@@ -65,6 +82,7 @@ namespace Services;
                 return newUser;
             }
         }
+
 
         public async Task<User> GetUserById(int id)
         {

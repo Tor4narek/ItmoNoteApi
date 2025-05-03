@@ -25,7 +25,7 @@ namespace Services;
         public async Task<User> AuthenticationAsync(int id, string firstName, string lastName, string username, string hash, long authDate)
         {
             // Проверяем подлинность данных Telegram
-            CheckTelegramAuthorizationAsync(id, firstName, lastName, username, authDate, hash);
+           await CheckTelegramAuthorizationAsync(id, firstName, lastName, username, authDate, hash);
 
             // Ищем пользователя по ID
             var _user = await GetUserById(id);

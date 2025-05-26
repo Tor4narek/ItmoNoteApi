@@ -4,9 +4,9 @@ WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
-# Создание директории для D ata Protection-Keys
-RUN mkdir -p /root/.aspnet/DataProtection-Keys \
-    && chmod -R 700 /root/.aspnet/DataProtection-Keys
+
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
+RUN apt-get update && apt-get install -y curl
 
 # Сборка проекта
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build

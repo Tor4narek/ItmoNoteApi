@@ -2,13 +2,12 @@
 
 services:
   api:
-    container_name: inapi-api
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8080:5000"   # HTTP
-      - "8081:5001"   # HTTPS или второй сервисный порт
+      - "5000"
+      - "5001"
     env_file:
       - .env
     environment:
@@ -23,8 +22,6 @@ services:
       - DEFAULT_CONNECTION
       - ALLOWEDHOSTS
       - ASPNETCORE_ENVIRONMENT=Production
-    volumes:
-      - data-protection-keys:/root/.aspnet/DataProtection-Keys
     restart: always
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
@@ -36,6 +33,23 @@ services:
       options:
         max-size: "10m"
         max-file: "5"
+    depends_on:
+      - db
+
+  db:
+    image: postgres:17
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432"
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      POSTGRES_DB: ${DB_NAME:-inapi_db}
+    restart: on-failure
 
 volumes:
-  data-protection-keys:
+  pgdata:
+    external: true

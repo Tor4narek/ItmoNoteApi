@@ -2,28 +2,40 @@
 
 services:
   api:
-    image: tor4narek/inapi:latest
-    profiles: ["production"]
+    container_name: inapi-api
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "8080:5000"
       - "8081:5001"
     env_file:
       - .env
     environment:
-      - JWT_KEY=${JWT_KEY}
-      - JWT_ISSUER=${JWT_ISSUER}
-      - JWT_AUDIENCE=${JWT_AUDIENCE}
-      - JWT_EXPIRY_IN_MINUTES=${JWT_EXPIRY_IN_MINUTES}
-      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
-      - MARKDOWN_PROD_PATH=${MARKDOWN_PROD_PATH}
-      - LOGGING__LOGLEVEL__DEFAULT=${LOGGING__LOGLEVEL__DEFAULT}
-      - LOGGING__LOGLEVEL__MICROSOFT_ASPNETCORE=${LOGGING__LOGLEVEL__MICROSOFT_ASPNETCORE}
-      - DEFAULT_CONNECTION=${DEFAULT_CONNECTION}
-      - ALLOWEDHOSTS=${ALLOWEDHOSTS}
+      - JWT_KEY
+      - JWT_ISSUER
+      - JWT_AUDIENCE
+      - JWT_EXPIRY_IN_MINUTES
+      - TELEGRAM_BOT_TOKEN
+      - MARKDOWN_PROD_PATH
+      - LOGGING__LOGLEVEL__DEFAULT
+      - LOGGING__LOGLEVEL__MICROSOFT_ASPNETCORE
+      - DEFAULT_CONNECTION
+      - ALLOWEDHOSTS
       - ASPNETCORE_ENVIRONMENT=Production
     volumes:
       - data-protection-keys:/root/.aspnet/DataProtection-Keys
     restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
 
 volumes:
   data-protection-keys:

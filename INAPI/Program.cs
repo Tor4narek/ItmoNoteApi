@@ -10,6 +10,7 @@ using System.Text;
 using DotNetEnv;
 using System.Text.RegularExpressions;
 
+DotNetEnv.Env.Load();
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {
     Args = args,
@@ -109,11 +110,7 @@ app.MapControllers();
 // Слушать на всех интерфейсах и порту 8080 (для Docker)
 app.Urls.Add("http://0.0.0.0:5000");
 
-// Если хранишь файлы вне wwwroot — явно укажи путь к ним
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider(Environment.GetEnvironmentVariable("MARKDOWN_PROD_PATH")),  // или свой путь к директории
-    RequestPath = "/files"
-});
+
+
 
 app.Run();

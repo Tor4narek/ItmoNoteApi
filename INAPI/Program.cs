@@ -17,7 +17,7 @@ var builder = WebApplication.CreateBuilder(new WebApplicationOptions
     EnvironmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"
 });
 
-
+//
 builder.Configuration.AddEnvironmentVariables();
 
 

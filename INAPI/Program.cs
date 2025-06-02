@@ -107,7 +107,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-// Слушать на всех интерфейсах и порту 8080 (для Docker)
+
 app.Urls.Add("http://0.0.0.0:5000");
 
 

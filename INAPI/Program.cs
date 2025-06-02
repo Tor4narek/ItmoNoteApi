@@ -17,14 +17,14 @@ var builder = WebApplication.CreateBuilder(new WebApplicationOptions
     EnvironmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"
 });
 
-// Загрузка .env (если нужно)
+
 builder.Configuration.AddEnvironmentVariables();
 
-// Настройка базы данных
+
 builder.Services.AddDbContext<ApplicationContext>(options =>
     options.UseNpgsql(Environment.GetEnvironmentVariable("DEFAULT_CONNECTION")));
 
-// Сервисы
+
 builder.Services.AddScoped<IAiService, AiService>();
 builder.Services.AddScoped<IUserService>(provider =>
     new UserService(provider.GetRequiredService<ApplicationContext>()));
@@ -34,7 +34,7 @@ builder.Services.AddScoped<INoteService>(provider =>
         provider.GetRequiredService<IAiService>(),
         provider.GetRequiredService<IUserService>()));
 
-// JWT
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {

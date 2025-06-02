@@ -92,7 +92,7 @@ jobs:
             echo "=== 🐳 Pulling latest Docker image ==="
             docker pull tor4narek/inapi:latest
 
-            echo "=== 🔍 Docker Compose config (resolved) ==="
+            echo "=== 🔍 Docker Compose config (resolved)  ==="
             docker compose config
 
             echo "=== 🚀 Starting containers ==="

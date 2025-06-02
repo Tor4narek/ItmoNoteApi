@@ -36,6 +36,9 @@ jobs:
           LOGGING__LOGLEVEL__MICROSOFT_ASPNETCORE=${{ secrets.LOGGING__LOGLEVEL__MICROSOFT_ASPNETCORE }}
           DEFAULT_CONNECTION=${{ secrets.DEFAULT_CONNECTION }}
           ALLOWEDHOSTS=${{ secrets.ALLOWEDHOSTS }}
+          DB_NAME=${{secrets.DB_NAME}}
+          DB_PASSWORD=${{secrets.DB_PASSWORD}}
+          DB_USER=${{secrets.DB_USER}}
           EOF
 
       - name: Build and Push Docker image
@@ -78,6 +81,9 @@ jobs:
             LOGGING__LOGLEVEL__MICROSOFT_ASPNETCORE=${{ secrets.LOGGING__LOGLEVEL__MICROSOFT_ASPNETCORE }}
             DEFAULT_CONNECTION=${{ secrets.DEFAULT_CONNECTION }}
             ALLOWEDHOSTS=${{ secrets.ALLOWEDHOSTS }}
+            DB_NAME=${{secrets.DB_NAME}}
+            DB_PASSWORD=${{secrets.DB_PASSWORD}}
+            DB_USER=${{secrets.DB_USER}}
             EOF
 
             echo "=== 📄 .env contents ==="
